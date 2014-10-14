@@ -2,13 +2,25 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
+import 'package:polymer/polymer.dart';
 import 'package:color/color.dart';
 import 'package:game_loop/game_loop_html.dart';
 import 'array2d.dart';
 
 void main() {
   CanvasElement canvas = querySelector("#area");
-  scheduleMicrotask(new Board(canvas, 60, new Point(48, 48), 8, 200).start);
+
+  Board board = new Board(canvas, 60, new Point(48, 48), 8, 200);
+  scheduleMicrotask(board.start);
+
+  initPolymer().run(() {
+    Polymer.onReady.then((_) {
+      var speedSlider = querySelector('#speed');
+      speedSlider.on['core-change'].listen((_) {
+        board.settings.speed = speedSlider.value;
+      });
+    });
+  });
 }
 
 Element notes = querySelector("#fps");
@@ -56,7 +68,6 @@ class Board {
     Rectangle rect = canvas.parent.client;
     width = rect.width;
     height = rect.height;
-    canvas.width = width;
 
     num size = min(width, height);
     settings.cellSize = new Point(size / settings.boardSize.x, size / settings.boardSize.y);

@@ -5,12 +5,22 @@
     <meta charset="utf-8">
     <title>AntsCluster</title>
     <link rel="stylesheet" href="antscluster.css">
+
+    <script src="packages/web_components/dart_support.js"></script>
+    <link rel="import" href="packages/paper_elements/paper_slider.html">
   </head>
-  <body>
+  <body unresolved>
     <h1>Ants Cluster</h1>
 
-    <div id="container">
+
+    <div vertical center layout>
+    <div id="container" center horizontal layout>
       <canvas id="area" width="400px" height="400px"></canvas>
+      <div center horizontal layout>
+        <div>Speed</div>
+        <paper-slider id="speed" min="1" max="200" value="100" pin snaps></paper-slider>
+      </div>
+    </div>
     </div>
 
     <footer>

@@ -6,5 +6,9 @@ dependencies:
   color: any
   game_loop:
       git: https://github.com/johnmccutchan/game_loop.git
+  polymer: any
+  paper_elements: any
+transformers:
+  - polymer
 dev_dependencies:
 #  unittest: any
