@@ -10,8 +10,7 @@ import 'array2d.dart';
 void main() {
   CanvasElement canvas = querySelector("#area");
 
-  Board board = new Board(canvas, 60, new Point(48, 48), 8, 200);
-  scheduleMicrotask(board.start);
+  Board board = new Board(canvas, 60, new Point(48, 48), 5, 700);
 
   initPolymer().run(() {
     Polymer.onReady.then((_) {
@@ -19,6 +18,22 @@ void main() {
       speedSlider.on['core-change'].listen((_) {
         board.settings.speed = speedSlider.value;
       });
+
+      var antsSlider = querySelector('#ants');
+      antsSlider.on['core-change'].listen((_) {
+        board.noAnts = antsSlider.value;
+      });
+
+      var colorSlider = querySelector('#colors');
+      colorSlider.on['core-change'].listen((_) {
+        board.noColor = colorSlider.value;
+        board.restart();
+      });
+
+      board.settings.speed = speedSlider.value;
+      board.noAnts = antsSlider.value;
+      board.noColor = colorSlider.value;
+      scheduleMicrotask(board.start);
     });
   });
 }
@@ -28,7 +43,9 @@ num fpsAverage;
 
 /// Display the animation's FPS in a div.
 void showFps(num fps) {
-  if (fpsAverage == null) fpsAverage = fps;
+  if (fpsAverage == null || fpsAverage.isInfinite || fpsAverage.isNaN)
+    fpsAverage = fps;
+
   fpsAverage = fps * 0.05 + fpsAverage * 0.95;
   notes.text = "${fpsAverage.round()} fps";
 }
@@ -44,7 +61,25 @@ class Board {
   num width;
   num height;
 
-  int noAnts;
+  //int noAnts;
+
+  int get noAnts => ants.length;
+
+  void set noAnts(int newNoAnts) {
+    if (newNoAnts < ants.length) {
+      ants.removeRange(newNoAnts, ants.length-1);
+    } else {
+      int noNew = newNoAnts - ants.length;
+      for (int i = 0; i < newNoAnts; i++) {
+        ants.add(new Ant(
+            settings,
+            rng.nextInt(settings.boardSize.x),
+            rng.nextInt(settings.boardSize.y)
+        ));
+      }
+    }
+  }
+
   int noColor;
   int noBlocks;
 
@@ -54,16 +89,17 @@ class Board {
   var ants = [];
   Array2d<Block> blocks;
 
-  Board(this.canvas, this.noAnts, Point boardSize, int this.noColor, int this.noBlocks) {
+  Board(this.canvas, int ants, Point boardSize, int this.noColor, int this.noBlocks) {
     settings = new Settings();
     settings.boardSize = boardSize;
-
     blocks = new Array2d<Block>(boardSize.x, boardSize.y);
+
+    this.noAnts = ants;
 
     gameLoop = new GameLoopHtml(canvas);
   }
 
-  start() {
+  void start() {
     // Measure the canvas element.
     Rectangle rect = canvas.parent.client;
     width = rect.width;
@@ -71,14 +107,6 @@ class Board {
 
     num size = min(width, height);
     settings.cellSize = new Point(size / settings.boardSize.x, size / settings.boardSize.y);
-
-    for (int i = 0; i < noAnts; i++) {
-      ants.add(new Ant(
-          settings,
-          rng.nextInt(settings.boardSize.x),
-          rng.nextInt(settings.boardSize.y)
-      ));
-    }
 
     for (int c = 0; c < noColor; c++) {
       Color color = new Color.rgb(rng.nextInt(256), rng.nextInt(256), rng.nextInt(256));
@@ -99,6 +127,16 @@ class Board {
     gameLoop.start();
   }
 
+  void restart() {
+    gameLoop.stop();
+
+    ants.forEach((a) => a.block = null);
+    blocks = new Array2d<Block>(settings.boardSize.x, settings.boardSize.y);
+    fpsAverage = null;
+
+    start();
+  }
+
   void draw() {
     num time = new DateTime.now().millisecondsSinceEpoch;
     if (renderTime != null) showFps(1000 / (time - renderTime));
@@ -112,10 +150,10 @@ class Board {
 
   void step(GameLoop gameLoop) {
     num time = new DateTime.now().millisecondsSinceEpoch;
-    num stepW = settings.speed / 100000 / gameLoop.dt;
+    num stepW = settings.speed / 1000 / gameLoop.dt;
 
     if (stepW < 1.0) {
-      if (time - lastTime >= 1 / stepW) {
+      if (time - lastTime >= 50 / stepW) {
         lastTime = time;
         ants.forEach(collision);
       }

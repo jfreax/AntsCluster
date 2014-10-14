@@ -1,33 +1,54 @@
 <!DOCTYPE html>
 
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>AntsCluster</title>
-    <link rel="stylesheet" href="antscluster.css">
+<head>
+  <meta charset="utf-8">
+  <title>AntsCluster</title>
+  <link rel="stylesheet" href="antscluster.css">
 
-    <script src="packages/web_components/dart_support.js"></script>
-    <link rel="import" href="packages/paper_elements/paper_slider.html">
-  </head>
-  <body unresolved>
-    <h1>Ants Cluster</h1>
+  <script src="packages/web_components/dart_support.js"></script>
+  <link rel="import" href="packages/paper_elements/paper_slider.html">
+
+  <style shim-shadowdom>
+    paper-slider {
+      width: 100%;
+    }
+    #menu {
+      width: 300px;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body unresolved>
+<h1>Ants Cluster</h1>
 
 
-    <div vertical center layout>
-    <div id="container" center horizontal layout>
-      <canvas id="area" width="400px" height="400px"></canvas>
+<div vertical center layout>
+  <div id="container" center horizontal layout>
+    <canvas id="area" width="400px" height="400px"></canvas>
+
+    <div id="menu" vertical layout>
       <div center horizontal layout>
         <div>Speed</div>
-        <paper-slider id="speed" min="1" max="200" value="100" pin snaps></paper-slider>
+        <paper-slider id="speed" min="1" max="500" value="100" pin></paper-slider>
+      </div>
+      <div center horizontal layout>
+        <div>#Ants</div>
+        <paper-slider id="ants" min="1" max="100" value="60" pin></paper-slider>
+      </div>
+      <div center horizontal layout>
+        <div>#Colors</div>
+        <paper-slider id="colors" min="1" max="50" value="5" pin></paper-slider>
       </div>
     </div>
-    </div>
+  </div>
+</div>
 
-    <footer>
-      <p id="fps"></p>
-    </footer>
+<footer>
+  <p id="fps"></p>
+</footer>
 
-    <script type="application/dart" src="antscluster.dart"></script>
-    <script src="packages/browser/dart.js"></script>
-  </body>
+<script type="application/dart" src="antscluster.dart"></script>
+<script src="packages/browser/dart.js"></script>
+</body>
 </html>
