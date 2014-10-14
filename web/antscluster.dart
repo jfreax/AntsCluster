@@ -30,9 +30,16 @@ void main() {
         board.restart();
       });
 
+      var blockSlider = querySelector('#blocks');
+      blockSlider.on['core-change'].listen((_) {
+        board.noBlocks = blockSlider.value;
+        board.restart();
+      });
+
       board.settings.speed = speedSlider.value;
       board.noAnts = antsSlider.value;
       board.noColor = colorSlider.value;
+      board.noBlocks = blockSlider.value;
       scheduleMicrotask(board.start);
     });
   });
