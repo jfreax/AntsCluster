@@ -1,0 +1,8 @@
+name: Ants Cluster
+version: 0.0.1
+description: Ants Cluster
+dependencies:
+  browser: any
+  color: any
+dev_dependencies:
+#  unittest: any
