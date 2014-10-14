@@ -180,11 +180,16 @@ class Board {
         blocks[ant.x][ant.y] = null;
       }
     } else if (ant.block != null) {
+      int noOfFittingNeighbours = 0;
       for (Block b in getNeighbourBlocks(ant.x, ant.y)) {
         if (b.color.toString() == ant.block.color.toString()) {
-          blocks[ant.x][ant.y] = ant.block;
-          ant.block = null;
-          break;
+          noOfFittingNeighbours++;
+
+          if (noOfFittingNeighbours >= 2) {
+            blocks[ant.x][ant.y] = ant.block;
+            ant.block = null;
+            break;
+          }
         }
       }
     }

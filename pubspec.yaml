@@ -10,5 +10,10 @@ dependencies:
   paper_elements: any
 transformers:
   - polymer
+  - $dart2js:
+      checked: true
+      minify: true
+      verbose: true
+      #analyzeAll: true
 dev_dependencies:
 #  unittest: any
