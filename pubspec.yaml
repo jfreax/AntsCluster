@@ -4,5 +4,7 @@ description: Ants Cluster
 dependencies:
   browser: any
   color: any
+  game_loop:
+      git: https://github.com/johnmccutchan/game_loop.git
 dev_dependencies:
 #  unittest: any

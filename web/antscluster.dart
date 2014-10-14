@@ -3,11 +3,12 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:color/color.dart';
+import 'package:game_loop/game_loop_html.dart';
 import 'array2d.dart';
 
 void main() {
   CanvasElement canvas = querySelector("#area");
-  scheduleMicrotask(new Board(canvas, 60, new Point(48, 48), 3, 200).start);
+  scheduleMicrotask(new Board(canvas, 60, new Point(48, 48), 8, 200).start);
 }
 
 Element notes = querySelector("#fps");
@@ -24,6 +25,7 @@ void showFps(num fps) {
 class Board {
   CanvasElement canvas;
   var rng = new Random();
+  GameLoopHtml gameLoop;
 
   Settings settings;
 
@@ -45,6 +47,8 @@ class Board {
     settings.boardSize = boardSize;
 
     blocks = new Array2d<Block>(boardSize.x, boardSize.y);
+
+    gameLoop = new GameLoopHtml(canvas);
   }
 
   start() {
@@ -78,10 +82,13 @@ class Board {
       }
     }
 
-    requestRedraw();
+    gameLoop.onUpdate = ((gameLoop) { step(gameLoop); });
+    gameLoop.onRender = ((gameLoop) { draw(); });
+
+    gameLoop.start();
   }
 
-  void draw(num _) {
+  void draw() {
     num time = new DateTime.now().millisecondsSinceEpoch;
     if (renderTime != null) showFps(1000 / (time - renderTime));
     renderTime = time;
@@ -90,18 +97,22 @@ class Board {
     drawBackground(context);
     drawBlocks(context);
     drawAnts(context);
-
-    requestRedraw();
-
-    num passed = time - lastTime;
-    if (passed > settings.speed) {
-      lastTime = time;
-      step();
-    }
   }
 
-  void step() {
-    ants.forEach(collision);
+  void step(GameLoop gameLoop) {
+    num time = new DateTime.now().millisecondsSinceEpoch;
+    num stepW = settings.speed / 100000 / gameLoop.dt;
+
+    if (stepW < 1.0) {
+      if (time - lastTime >= 1 / stepW) {
+        lastTime = time;
+        ants.forEach(collision);
+      }
+    } else {
+      for (int i = 0; i < stepW; i++) {
+        ants.forEach(collision);
+      }
+    }
   }
 
   void collision(Ant ant) {
@@ -113,17 +124,13 @@ class Board {
         blocks[ant.x][ant.y] = null;
       }
     } else if (ant.block != null) {
-      //print("Position: " + ant.x.toString() + "x" + ant.y.toString());
       for (Block b in getNeighbourBlocks(ant.x, ant.y)) {
-        //print("Neighbour: " + b.x.toString() + "x" + b.y.toString());
         if (b.color.toString() == ant.block.color.toString()) {
-          //print(b.color.toString() + " vs. " + ant.block.color.toString());s
           blocks[ant.x][ant.y] = ant.block;
           ant.block = null;
           break;
         }
       }
-      //print("---------");
     }
   }
 
@@ -143,10 +150,6 @@ class Board {
         }
       }
     }
-  }
-
-  void requestRedraw() {
-    window.requestAnimationFrame(draw);
   }
 
   List<Block> getNeighbourBlocks(int x, int y) {
@@ -181,7 +184,7 @@ class Board {
 }
 
 class Settings {
-  num speed = 10;
+  num speed = 100;
   Point boardSize;
   Point cellSize;
 }
@@ -193,29 +196,44 @@ class Ant {
   Block block = null;
   num x;
   num y;
+  int direction = rng.nextInt(4);
 
   Ant(this.settings, this.x, this.y);
 
   void step() {
-    switch (rng.nextInt(4)) {
+    direction += (rng.nextInt(3) - 1);
+
+    if (direction < 0) {
+      direction = 3;
+    } else if (direction > 3) {
+      direction = 0;
+    }
+
+    switch (direction) {
       case 0:
-        x += 1;
+        y -= 1;
         break;
       case 1:
-        x -= 1;
+        x += 1;
         break;
       case 2:
         y += 1;
         break;
       default:
-        y -= 1;
+        x -= 1;
         break;
     }
 
-    x = min(x, settings.boardSize.x-1);
-    x = max(0, x);
-    y = min(y, settings.boardSize.y-1);
-    y = max(0, y);
+    if (x < 0) {
+      x = settings.boardSize.x - 1;
+    } else if (x >= settings.boardSize.x) {
+      x = 0;
+    }
+    if (y < 0) {
+      y = settings.boardSize.y - 1;
+    } else if (y >= settings.boardSize.y) {
+      y = 0;
+    }
 
     if (block != null) {
       block.x = x;
