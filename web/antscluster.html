@@ -10,22 +10,39 @@
   <link rel="import" href="packages/paper_elements/paper_slider.html">
 
   <style shim-shadowdom>
+    html,body {
+      height: 100%;
+      margin-top: 0;
+      margin-bottom: 0;
+      /*padding-top: 0;*/
+      /*padding-bottom: 0;*/
+    }
+
     paper-slider {
       width: 100%;
     }
+
+    #title {
+      display: inline-block;
+    }
+
     #menu {
       width: 300px;
-      padding: 8px;
+      padding-left: 16px;
+    }
+
+    #fps {
+      float: right;
     }
   </style>
 </head>
 <body unresolved>
-<h1>Ants Cluster</h1>
+<h1 id="title">Ants Cluster</h1>
+<p id="fps"></p>
 
-
-<div vertical center layout>
+<div vertical layout>
   <div id="container" center horizontal layout>
-    <canvas id="area" width="400px" height="400px"></canvas>
+    <canvas id="area"></canvas>
 
     <div id="menu" vertical layout>
       <div center horizontal layout>
@@ -42,14 +59,13 @@
       </div>
       <div center horizontal layout>
         <div>#Blocks</div>
-        <paper-slider id="blocks" min="10" max="1000" value="250" pin></paper-slider>
+        <paper-slider id="blocks" min="100" max="10000" value="250" pin></paper-slider>
       </div>
     </div>
   </div>
 </div>
 
 <footer>
-  <p id="fps"></p>
 </footer>
 
 <script type="application/dart" src="antscluster.dart"></script>

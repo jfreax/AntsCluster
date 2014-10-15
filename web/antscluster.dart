@@ -10,7 +10,7 @@ import 'array2d.dart';
 void main() {
   CanvasElement canvas = querySelector("#area");
 
-  Board board = new Board(canvas, 60, new Point(48, 48), 5, 700);
+  Board board = new Board(canvas, 60, new Point(248, 248), 5, 700);
 
   initPolymer().run(() {
     Polymer.onReady.then((_) {
@@ -108,11 +108,18 @@ class Board {
 
   void start() {
     // Measure the canvas element.
-    Rectangle rect = canvas.parent.client;
-    width = rect.width;
-    height = rect.height;
+    Rectangle rect = querySelector("body").client;
+    var title = querySelector("#title");
 
-    num size = min(width, height);
+    width = rect.width;
+    height = (rect.height - title.borderEdge.height - title.marginEdge.height).round();
+    print(querySelector("#title").borderEdge.height);
+
+    num size = min(height, width);
+
+    canvas.width = size;
+    canvas.height = size;
+
     settings.cellSize = new Point(size / settings.boardSize.x, size / settings.boardSize.y);
 
     for (int c = 0; c < noColor; c++) {
@@ -174,12 +181,13 @@ class Board {
   void collision(Ant ant) {
     ant.step();
 
-    if (blocks[ant.x][ant.y] != null) {
+    if (blocks[ant.x][ant.y] != null) { // aufheben
       if (ant.block == null) {
         ant.block = blocks[ant.x][ant.y];
+        ant.taken = 3;
         blocks[ant.x][ant.y] = null;
       }
-    } else if (ant.block != null) {
+    } else if (ant.block != null && ant.taken <= 0) { // ablegen
       int noOfFittingNeighbours = 0;
       for (Block b in getNeighbourBlocks(ant.x, ant.y)) {
         if (b.color.toString() == ant.block.color.toString()) {
@@ -259,15 +267,21 @@ class Ant {
   num y;
   int direction = rng.nextInt(4);
 
+  num taken = 0;
+
   Ant(this.settings, this.x, this.y);
 
   void step() {
-    direction += (rng.nextInt(3) - 1);
+    taken--;
 
-    if (direction < 0) {
-      direction = 3;
-    } else if (direction > 3) {
-      direction = 0;
+    if (rng.nextInt(5) <= 1) {
+      direction += (rng.nextInt(3) - 1);
+
+      if (direction < 0) {
+        direction = 3;
+      } else if (direction > 3) {
+        direction = 0;
+      }
     }
 
     switch (direction) {
